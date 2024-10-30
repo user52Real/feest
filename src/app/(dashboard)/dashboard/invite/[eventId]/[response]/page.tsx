@@ -1,14 +1,18 @@
-
 import { redirect } from 'next/navigation';
 import { ObjectId } from 'mongodb';
 import clientPromise from '@/app/lib/mongodb';
 
-export default async function RSVPPage({ 
-  params 
-}: { 
-  params: { eventId: string; response: 'accept' | 'decline'; email: string } 
-}) {
-  const { eventId, response, email } = params;
+interface RSVPPageProps {
+  params: Promise<{
+    eventId: string;
+    response: 'accept' | 'decline';
+    email: string;
+  }>;
+}
+
+export default async function RSVPPage({ params }: RSVPPageProps) {
+  // Await the params
+  const { eventId, response, email } = await params;
 
   try {
     const client = await clientPromise;
