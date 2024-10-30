@@ -13,9 +13,9 @@ interface EventFormData {
   guests: string;
 }
 
-interface PageProps {
-  params: { eventId: string };
-}
+// interface PageProps {
+//   params: { eventId: string };
+// }
 
 function EditEventPageLoading() {
   return (
@@ -46,8 +46,6 @@ export default function EditEventPageWrapper({
     </Suspense>
   );
 }
-
-
 
 function EditEventPage({
   params,
