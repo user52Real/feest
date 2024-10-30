@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@clerk/nextjs';
+import { ClerkProvider, useAuth } from '@clerk/nextjs';
 
 interface EventFormData {
   title: string;
@@ -17,12 +17,49 @@ interface PageProps {
   params: { eventId: string };
 }
 
-export default function EditEventPage({ params }: PageProps) {
+function EditEventPageLoading() {
+  return (
+    <div className="max-w-2xl mx-auto p-6">
+      <div className="animate-pulse">
+        <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
+        <div className="space-y-6">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="h-10 bg-gray-200 rounded"></div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Wrapper component
+export default function EditEventPageWrapper({
+  params,
+}: {
+  params: { eventId: string };
+}) {
+  return (
+    <Suspense fallback={<EditEventPageLoading />}>
+      <ClerkProvider dynamic>
+        <EditEventPage params={Promise.resolve(params)} />
+      </ClerkProvider>
+    </Suspense>
+  );
+}
+
+
+
+function EditEventPage({
+  params,
+}: {
+  params: Promise<{ eventId: string }>;
+}) {
   const router = useRouter();
   const { getToken } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const unwrappedParams = use(params);
   
   const [formData, setFormData] = useState<EventFormData>({
     title: '',
@@ -37,7 +74,7 @@ export default function EditEventPage({ params }: PageProps) {
     async function fetchEvent() {
       try {
         const token = await getToken();
-        const response = await fetch(`/api/events/${params.eventId}`, {
+        const response = await fetch(`/api/events/${unwrappedParams.eventId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -64,7 +101,7 @@ export default function EditEventPage({ params }: PageProps) {
     }
 
     fetchEvent();
-  }, [params.eventId, getToken]);
+  }, [unwrappedParams.eventId, getToken]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,7 +110,7 @@ export default function EditEventPage({ params }: PageProps) {
 
     try {
       const token = await getToken();
-      const response = await fetch(`/api/events/${params.eventId}`, {
+      const response = await fetch(`/api/events/${unwrappedParams.eventId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -112,6 +149,7 @@ export default function EditEventPage({ params }: PageProps) {
       </div>
     );
   }
+
 
   return (
     <div className="max-w-2xl mx-auto p-6">
