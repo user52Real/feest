@@ -17,7 +17,6 @@ export async function GET(
     const client = await clientPromise;
     const db = client.db('feest');
 
-    // Find event and check authorization
     const event = await db.collection('events').findOne({
       _id: new ObjectId(params.eventId),
       userId
@@ -48,19 +47,9 @@ export async function PATCH(
     }
 
     const data = await request.json();
-
-    // Validate guest data
-    if (!Array.isArray(data.guests)) {
-      return NextResponse.json(
-        { error: 'Invalid guests data format' },
-        { status: 400 }
-      );
-    }
-
     const client = await clientPromise;
     const db = client.db('feest');
 
-    // Update event with new guest list
     const result = await db.collection('events').updateOne(
       { _id: new ObjectId(params.eventId), userId },
       {
