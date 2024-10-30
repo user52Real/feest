@@ -1,20 +1,20 @@
 import { ClerkProvider } from '@clerk/nextjs';
 import { Inter } from 'next/font/google';
 import './globals.css';
+import { Metadata } from 'next';
 
 const inter = Inter({ subsets: ['latin'] });
 
-// export async function generateMetadata() {
-//   return {
-//     metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL!),
-//     alternates: {
-//       canonical: '/',
-//     },
-//     openGraph: {
-//       images: '/og-image.png',
-//     },
-//   };
-// }
+export const metadata: Metadata = {
+  title: 'Event Management Platform',
+  description: 'Create and manage your events easily',
+  keywords: 'events, management, rsvp, planning',
+  openGraph: {
+    title: 'Event Management Platform',
+    description: 'Create and manage your events easily',
+    images: ['/og-image.jpg'],
+  },
+};
 
 export default function RootLayout({
   children,
