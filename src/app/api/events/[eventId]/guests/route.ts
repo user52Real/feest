@@ -4,9 +4,15 @@ import { auth } from '@clerk/nextjs/server';
 import clientPromise from '@/app/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
+interface RouteParams {
+  params: {
+    eventId: string;
+  };
+}
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: { eventId: string } }
+  context: RouteParams
 ) {
   try {
     const { userId } = await auth();
@@ -18,7 +24,7 @@ export async function GET(
     const db = client.db('feest');
 
     const event = await db.collection('events').findOne({
-      _id: new ObjectId(params.eventId),
+      _id: new ObjectId(context.params.eventId),
       userId
     });
 
@@ -38,7 +44,7 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { eventId: string } }
+  context: RouteParams
 ) {
   try {
     const { userId } = await auth();
@@ -51,7 +57,7 @@ export async function PATCH(
     const db = client.db('feest');
 
     const result = await db.collection('events').updateOne(
-      { _id: new ObjectId(params.eventId), userId },
+      { _id: new ObjectId(context.params.eventId), userId },
       {
         $set: {
           guests: data.guests,
