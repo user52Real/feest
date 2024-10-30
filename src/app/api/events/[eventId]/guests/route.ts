@@ -4,17 +4,17 @@ import { auth } from '@clerk/nextjs/server';
 import clientPromise from '@/app/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
-type RouteContext = {
+// Correct type for the context parameter in App Router route handlers
+type Context = {
   params: {
     eventId: string;
-  }
-}
+  };
+};
 
 export async function GET(
-  req: NextRequest,
-  context: RouteContext
-) {
-  const { params } = context;
+  _request: NextRequest,
+  context: Context
+): Promise<NextResponse> {
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -45,8 +45,8 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  context: RouteContext
-) {
+  context: Context
+): Promise<NextResponse> {
   try {
     const { userId } = await auth();
     if (!userId) {
