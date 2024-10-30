@@ -84,4 +84,4 @@ export async function PATCH(
 }
 
 // Configure the runtime to use edge
-export const runtime = 'edge';
+//export const runtime = 'edge';
