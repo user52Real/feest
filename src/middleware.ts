@@ -1,29 +1,46 @@
-import { clerkMiddleware, ClerkMiddlewareAuth, createRouteMatcher } from "@clerk/nextjs/server";
-import { NextRequest, NextResponse } from "next/server";
-import { rateLimitMiddleware } from "./app/lib/middleware/rateLimit";
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
+import type { NextFetchEvent, NextRequest } from 'next/server';
 
-// Define protected routes using createRouteMatcher
-const protectedRoutes = createRouteMatcher([
-  "/dashboard(.*)",
-  "/events(.*)",
-  "/settings(.*)",
-  "/api/events(.*)"
+// Define public routes that don't require authentication
+const publicRoutes = createRouteMatcher([
+  '/',
+  '/sign-in',
+  '/sign-up',
+  '/api/invitations/(.*)',
+  '/invite/(.*)',
+  '/_next/static/(.*)',
+  '/favicon.ico',
+  '/api/webhook/(.*)'
 ]);
 
-export default clerkMiddleware( async (auth, req) => {  
-    // Apply rate limiting before authentication  
-    if (protectedRoutes(req)) await auth.protect() 
-});
+export default function middleware(req: NextRequest, event: NextFetchEvent) {
+  // Handle CORS
+  const origin = req.headers.get('origin') || '';
+  const allowedOrigins = [
+    process.env.NEXT_PUBLIC_APP_URL,
+    '*'
+  ];
 
+  if (!allowedOrigins.includes(origin)) {
+    return new NextResponse(null, {
+      status: 403,
+      statusText: 'Forbidden',
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+    });
+  }
+
+  // Skip auth for public routes
+  if (publicRoutes(req)) {
+    return NextResponse.next();
+  }
+
+  // Apply Clerk middleware
+  return clerkMiddleware()(req, event);
+}
+// Configure the middleware
 export const config = {
-    matcher: [
-      // Skip Next.js internals and all static files, unless found in search params
-      '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-      // Always run for API routes
-      '/(api|trpc)(.*)',
-    ],
-}
-
-function afterAuth(auth: ClerkMiddlewareAuth, req: NextRequest) {
-  throw new Error("Function not implemented.");
-}
+  matcher: ['/((?!.+\\.[\\w]+$|_next).*)', '/', '/(api|trpc)(.*)'],
+};
