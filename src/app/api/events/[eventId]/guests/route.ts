@@ -4,18 +4,13 @@ import { auth } from '@clerk/nextjs/server';
 import clientPromise from '@/app/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
-// Correct type for the context parameter in App Router route handlers
-type Context = {
-  params: {
-    eventId: string;
-  };
-};
-
 export async function GET(
-  _request: NextRequest,
-  context: Context
-): Promise<NextResponse> {
+  request: NextRequest,
+  { params }: { params: Promise<{ eventId: string }> }
+) {
+  const eventId = (await params).eventId
   try {
+    
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -25,7 +20,7 @@ export async function GET(
     const db = client.db('feest');
 
     const event = await db.collection('events').findOne({
-      _id: new ObjectId(context.params.eventId),
+      _id: new ObjectId((await params).eventId),
       userId
     });
 
@@ -45,8 +40,8 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  context: Context
-): Promise<NextResponse> {
+  { params }: { params: { eventId: string } }
+) {
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -54,19 +49,11 @@ export async function PATCH(
     }
 
     const data = await request.json();
-
-    if (!Array.isArray(data.guests)) {
-      return NextResponse.json(
-        { error: 'Invalid guests data format' },
-        { status: 400 }
-      );
-    }
-
     const client = await clientPromise;
     const db = client.db('feest');
 
     const result = await db.collection('events').updateOne(
-      { _id: new ObjectId(context.params.eventId), userId },
+      { _id: new ObjectId(params.eventId), userId },
       {
         $set: {
           guests: data.guests,
