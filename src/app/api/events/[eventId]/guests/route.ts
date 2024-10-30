@@ -5,7 +5,7 @@ import clientPromise from '@/app/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
 export async function GET(
-  req: NextRequest,
+  request: NextRequest,
   { params }: { params: { eventId: string } }
 ) {
   try {
@@ -13,12 +13,11 @@ export async function GET(
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    const data = await req.json();
-    const { prompt } = data as { prompt: string };
 
     const client = await clientPromise;
     const db = client.db('feest');
 
+    // Find event and check authorization
     const event = await db.collection('events').findOne({
       _id: new ObjectId(params.eventId),
       userId
@@ -49,9 +48,19 @@ export async function PATCH(
     }
 
     const data = await request.json();
+
+    // Validate guest data
+    if (!Array.isArray(data.guests)) {
+      return NextResponse.json(
+        { error: 'Invalid guests data format' },
+        { status: 400 }
+      );
+    }
+
     const client = await clientPromise;
     const db = client.db('feest');
 
+    // Update event with new guest list
     const result = await db.collection('events').updateOne(
       { _id: new ObjectId(params.eventId), userId },
       {
