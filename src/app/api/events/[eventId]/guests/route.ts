@@ -1,18 +1,16 @@
-import type { NextRequest } from 'next/server';
+import { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import clientPromise from '@/app/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
-interface Context {
-  params: {
-    eventId: string;
-  }
+type Props = {
+  params: { eventId: string }
 }
 
 export async function GET(
-  req: NextRequest,
-  context: Context
+  _: NextRequest,
+  props: Props
 ) {
   try {
     const { userId } = await auth();
@@ -24,7 +22,7 @@ export async function GET(
     const db = client.db('feest');
 
     const event = await db.collection('events').findOne({
-      _id: new ObjectId(context.params.eventId),
+      _id: new ObjectId(props.params.eventId),
       userId
     });
 
@@ -43,8 +41,8 @@ export async function GET(
 }
 
 export async function PATCH(
-  req: NextRequest,
-  context: Context
+  request: NextRequest,
+  props: Props
 ) {
   try {
     const { userId } = await auth();
@@ -52,12 +50,12 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const data = await req.json();
+    const data = await request.json();
     const client = await clientPromise;
     const db = client.db('feest');
 
     const result = await db.collection('events').updateOne(
-      { _id: new ObjectId(context.params.eventId), userId },
+      { _id: new ObjectId(props.params.eventId), userId },
       {
         $set: {
           guests: data.guests,
@@ -82,6 +80,3 @@ export async function PATCH(
     );
   }
 }
-
-// Configure the runtime to use edge
-//export const runtime = 'edge';
