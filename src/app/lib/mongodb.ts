@@ -1,12 +1,20 @@
 // src/app/lib/mongodb.ts
-import { MongoClient } from 'mongodb';
+import { MongoClient, MongoClientOptions  } from 'mongodb';
 
 if (!process.env.MONGODB_URI) {
   throw new Error('Invalid/Missing environment variable: "MONGODB_URI"');
 }
 
 const uri = process.env.MONGODB_URI;
-const options = {};
+const options: MongoClientOptions = {
+  maxPoolSize: 10,
+  minPoolSize: 5,
+  maxIdleTimeMS: 60000,
+  waitQueueTimeoutMS: 30000,
+  connectTimeoutMS: 30000,
+  retryWrites: true,
+  retryReads: true,
+};
 
 let client;
 let clientPromise: Promise<MongoClient>;

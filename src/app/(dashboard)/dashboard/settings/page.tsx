@@ -78,7 +78,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-gradient-to-tr from-blue-400 to-purple-300 text-black">
+    <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-gradient-to-tr from-blue-400 to-purple-300 w-full min-h-screen">
       <div className="space-y-8 ">
         {/* Profile Section */}
         <div>
@@ -93,7 +93,7 @@ export default function SettingsPage() {
                 />
               </div>
               <div>
-                <h3 className="text-lg font-medium text-gray-900">{user?.fullName}</h3>
+                <h3 className="text-lg font-medium text-gray-900 ">{user?.fullName}</h3>
                 <p className="text-sm text-gray-500">{user?.primaryEmailAddress?.emailAddress}</p>
               </div>
             </div>
@@ -102,7 +102,7 @@ export default function SettingsPage() {
 
         <form onSubmit={handleSubmit}>
           {/* Notification Settings */}
-          <div className="bg-white shadow rounded-lg p-6 mb-6 text-black">
+          <div className="bg-white shadow rounded-lg p-6 mb-6 text-black ">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Notifications</h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between">

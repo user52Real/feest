@@ -4,6 +4,10 @@ import Link from 'next/link';
 import clientPromise from '@/app/lib/mongodb';
 import { Event } from '@/app/types/events';
 
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
 async function getUpcomingEvents(userId: string) {
   try {
     const client = await clientPromise;

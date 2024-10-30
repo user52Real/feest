@@ -13,6 +13,10 @@ interface EventFormData {
   guests: string;
 }
 
+interface PageProps {
+  params: { eventId: string };
+}
+
 function EditEventPageLoading() {
   return (
     <div className="max-w-2xl mx-auto p-6">
@@ -28,18 +32,35 @@ function EditEventPageLoading() {
   );
 }
 
-// Main component
-export default function EditEventPage({ 
-  params 
-}: { 
-  params: Promise<{ eventId: string }> | { eventId: string }
+// Wrapper component
+export default function EditEventPageWrapper({
+  params,
+}: {
+  params: { eventId: string };
+}) {
+  return (
+    <Suspense fallback={<EditEventPageLoading />}>
+      <ClerkProvider dynamic>
+
+        <EditEventPage params={Promise.resolve(params)} />
+      </ClerkProvider>
+    </Suspense>
+  );
+}
+
+
+
+function  EditEventPage( {
+  params,
+}: {
+  params: Promise<{ eventId: string }>;
 }) {
   const router = useRouter();
   const { getToken } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const unwrappedParams = params instanceof Promise ? use(params) : params;
+  const unwrappedParams = use(params);
   
   const [formData, setFormData] = useState<EventFormData>({
     title: '',
@@ -116,8 +137,20 @@ export default function EditEventPage({
   };
 
   if (isLoading) {
-    return <EditEventPageLoading />;
+    return (
+      <div className="max-w-2xl mx-auto p-6">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
+          <div className="space-y-6">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="h-10 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
+
 
   return (
     <div className="max-w-2xl mx-auto p-6">

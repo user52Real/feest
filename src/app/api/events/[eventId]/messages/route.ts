@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import clientPromise from '@/app/lib/mongodb';
 import { ObjectId } from 'mongodb';
+import { validateAndSanitizeMessage } from '@/app/lib/security/sanitize';
+import { ApiError, handleApiError } from '@/app/lib/errors/ApiError';
 
 export async function GET(
   request: Request,
