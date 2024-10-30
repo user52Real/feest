@@ -1,3 +1,4 @@
+// src/app/(dashboard)/dashboard/events/[eventId]/edit/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -13,11 +14,11 @@ interface EventFormData {
   guests: string;
 }
 
-interface PageProps {
+interface EditEventPageProps {
   params: { eventId: string };
 }
 
-export default function EditEventPage({ params }: PageProps) {
+export default function EditEventPage({ params }: EditEventPageProps) {
   const router = useRouter();
   const { getToken } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
@@ -126,7 +127,6 @@ export default function EditEventPage({ params }: PageProps) {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Form fields remain the same */}
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-black">
             Event Title
