@@ -4,10 +4,17 @@ import { auth } from '@clerk/nextjs/server';
 import clientPromise from '@/app/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
+type RouteContext = {
+  params: {
+    eventId: string;
+  }
+}
+
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { eventId: string } }
+  req: NextRequest,
+  context: RouteContext
 ) {
+  const { params } = context;
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -18,7 +25,7 @@ export async function GET(
     const db = client.db('feest');
 
     const event = await db.collection('events').findOne({
-      _id: new ObjectId(params.eventId),
+      _id: new ObjectId(context.params.eventId),
       userId
     });
 
@@ -38,7 +45,7 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { eventId: string } }
+  context: RouteContext
 ) {
   try {
     const { userId } = await auth();
@@ -47,11 +54,19 @@ export async function PATCH(
     }
 
     const data = await request.json();
+
+    if (!Array.isArray(data.guests)) {
+      return NextResponse.json(
+        { error: 'Invalid guests data format' },
+        { status: 400 }
+      );
+    }
+
     const client = await clientPromise;
     const db = client.db('feest');
 
     const result = await db.collection('events').updateOne(
-      { _id: new ObjectId(params.eventId), userId },
+      { _id: new ObjectId(context.params.eventId), userId },
       {
         $set: {
           guests: data.guests,
