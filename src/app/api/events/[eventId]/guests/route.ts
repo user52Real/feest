@@ -3,9 +3,16 @@ import { auth } from '@clerk/nextjs/server';
 import clientPromise from '@/app/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
+// Define the correct type for route context
+type RouteContext = {
+  params: {
+    eventId: string;
+  };
+};
+
 export async function PATCH(
-  request: NextRequest,
-  context: { params: { eventId: string } }
+  req: NextRequest,
+  { params }: RouteContext
 ) {
   try {
     const { userId } = await auth();
@@ -13,12 +20,12 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const data = await request.json();
+    const data = await req.json();
     const client = await clientPromise;
     const db = client.db('feest');
 
     const result = await db.collection('events').updateOne(
-      { _id: new ObjectId(context.params.eventId), userId },
+      { _id: new ObjectId(params.eventId), userId },
       {
         $set: {
           guests: data.guests,
@@ -44,10 +51,9 @@ export async function PATCH(
   }
 }
 
-// GET method handler
 export async function GET(
-  request: NextRequest,
-  context: { params: { eventId: string } }
+  req: NextRequest,
+  { params }: RouteContext
 ) {
   try {
     const { userId } = await auth();
@@ -59,7 +65,7 @@ export async function GET(
     const db = client.db('feest');
 
     const event = await db.collection('events').findOne({
-      _id: new ObjectId(context.params.eventId),
+      _id: new ObjectId(params.eventId),
       userId
     });
 
