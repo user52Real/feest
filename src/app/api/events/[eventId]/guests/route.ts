@@ -4,27 +4,23 @@ import { auth } from '@clerk/nextjs/server';
 import clientPromise from '@/app/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
-interface RouteParams {
-  params: {
-    eventId: string;
-  };
-}
-
 export async function GET(
-  request: NextRequest,
-  context: RouteParams
+  req: NextRequest,
+  { params }: { params: { eventId: string } }
 ) {
   try {
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    const data = await req.json();
+    const { prompt } = data as { prompt: string };
 
     const client = await clientPromise;
     const db = client.db('feest');
 
     const event = await db.collection('events').findOne({
-      _id: new ObjectId(context.params.eventId),
+      _id: new ObjectId(params.eventId),
       userId
     });
 
@@ -44,7 +40,7 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  context: RouteParams
+  { params }: { params: { eventId: string } }
 ) {
   try {
     const { userId } = await auth();
@@ -57,7 +53,7 @@ export async function PATCH(
     const db = client.db('feest');
 
     const result = await db.collection('events').updateOne(
-      { _id: new ObjectId(context.params.eventId), userId },
+      { _id: new ObjectId(params.eventId), userId },
       {
         $set: {
           guests: data.guests,
